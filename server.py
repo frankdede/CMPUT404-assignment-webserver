@@ -26,14 +26,28 @@ import SocketServer
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
+mime = {"html":"text/html","css":"text/css"}
+rootDir = "./www"
 
 class MyWebServer(SocketServer.BaseRequestHandler):
     
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        print ("Got a request of: %s\n" % self.data)
-        self.request.sendall("OK")
+        self.methodStr = self.data.split()[0]
+        # Get the method from the request
+        
+        self.fileDir = self.data.split()[1]
+        # Get directory of the target file
 
+        self.hostAddr = self.data.split('\r\n')[2]
+        # Get host IP
+        if self.fileDir is "/":
+            file = open(rootDir + "/index.html",'r')
+        else: 
+            file = open(rootDir + self.fileDir,'r')
+        content = file.read()
+        self.request.sendall(content)
+        
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
 
@@ -44,3 +58,4 @@ if __name__ == "__main__":
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()
+
