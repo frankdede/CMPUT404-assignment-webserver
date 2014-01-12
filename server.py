@@ -27,11 +27,12 @@ import os.path
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
-mime = {"html":"text/html\n\n","css":"text/css\n\n"}
+mime = {"html":" text/html\n\n",
+        "css":" text/css\n\n"}
 
 status = {"200":" 200 OK\n",
         "415":" 415 Unsupported Media Type\n",
-        "400":""}
+        "400":" 404 Not Found\n"}
 
 rootPath = "./www"
 
@@ -47,33 +48,40 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         # Get directory of the target file
 
         if os.path.isfile(rootPath + filePath):
+        # test if the file exists
             fileExt = filePath.split(".")[1]
 
             if (fileExt is "css") || (fileExt is "html") :
+                # open a file in either .css or .html type
                 f = open(rootPath + filePath,'r')
 
                 content = httpVer + status["200"] +
-                        "Content-Type: " + mime[fileExt]
+                        "Content-Type:" + mime[fileExt]
                         + f.read()
-            else
+            else:
 
                 content = httpVer + status["415"] +
-                        "Content-Type: " + mime["html"] +
+                        "Content-Type:" + mime["html"] +
                         "<!DOCTYPE html>\n"+
                         "<html><body>" + httpVer + " 415 Unsupported Media Type\n"+
                         "</body></html>"
 
-        elif rootPath is "/":
-
+        elif filePath is "/":
+        # when path is /
             if os.path.isfile(rootPath + "index.html"):
                 f = open(rootPath + "/index.html",'r')
             
-                content = httpVer + " 200 OK\n" +
-                    "Content-Type: " + mine["html"] +
+                content = httpVer + status["200"] +
+                    "Content-Type:" + mime["html"] +
                     f.read()
 
         else:
-            content = httpVer + " 400 "
+            content = httpVer + status["400"] +
+            "Content-Type:" + mime["html"]+
+            "<!DOCTYPE html>\n" +
+            "<html><body>" + httpVer + status["400"] +
+            "</body></html>"
+
         self.request.sendall(content)
         
 if __name__ == "__main__":
