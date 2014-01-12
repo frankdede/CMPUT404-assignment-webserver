@@ -1,4 +1,5 @@
 import SocketServer
+import os.path
 # coding: utf-8
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
@@ -26,26 +27,40 @@ import SocketServer
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
-mime = {"html":"text/html","css":"text/css"}
-rootDir = "./www"
+mime = {"html":"text/html\n\n","css":"text/css\n\n"}
+rootPath = "./www"
 
 class MyWebServer(SocketServer.BaseRequestHandler):
     
     def handle(self):
-        self.data = self.request.recv(1024).strip()
-        self.methodStr = self.data.split()[0]
+        data = self.request.recv(1024).strip()
+        methodStr = data.split()[0]
         # Get the method from the request
-        
-        self.fileDir = self.data.split()[1]
+        httpVer = data.split()[2]
+        # Get the http protocl version
+        filePath = data.split()[1]
         # Get directory of the target file
 
-        self.hostAddr = self.data.split('\r\n')[2]
-        # Get host IP
-        if self.fileDir is "/":
+        if os.path.isfile(rootPath + filePath):
+            fileExt = filePath.split(".")[1]
+
+            if (fileExt is "css") || (fileExt is "html") :
+                f = open(filePath)
+                content = httpVer+" 200 OK\n"+
+                        "Content-Type: "+mime[fileExt]
+                        + f.read()
+            else
+                content = httpVer + " 415 Unsupported Media Type\n"+
+                        "Content-Type: "+
+                
+
+        elif os.path.isfile(rootDir + "index.html")
             file = open(rootDir + "/index.html",'r')
         else: 
-            file = open(rootDir + self.fileDir,'r')
-        content = file.read()
+           
+            
+        
+        
         self.request.sendall(content)
         
 if __name__ == "__main__":
