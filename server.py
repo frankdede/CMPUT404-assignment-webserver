@@ -28,6 +28,11 @@ import os.path
 # try: curl -v -X GET http://127.0.0.1:8080/
 
 mime = {"html":"text/html\n\n","css":"text/css\n\n"}
+
+status = {"200":" 200 OK\n",
+        "415":" 415 Unsupported Media Type\n",
+        "400":""}
+
 rootPath = "./www"
 
 class MyWebServer(SocketServer.BaseRequestHandler):
@@ -45,22 +50,30 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             fileExt = filePath.split(".")[1]
 
             if (fileExt is "css") || (fileExt is "html") :
-                f = open(filePath)
-                content = httpVer+" 200 OK\n"+
-                        "Content-Type: "+mime[fileExt]
+                f = open(rootPath + filePath,'r')
+
+                content = httpVer + status["200"] +
+                        "Content-Type: " + mime[fileExt]
                         + f.read()
             else
-                content = httpVer + " 415 Unsupported Media Type\n"+
-                        "Content-Type: "+
-                
 
-        elif os.path.isfile(rootDir + "index.html")
-            file = open(rootDir + "/index.html",'r')
-        else: 
-           
+                content = httpVer + status["415"] +
+                        "Content-Type: " + mime["html"] +
+                        "<!DOCTYPE html>\n"+
+                        "<html><body>" + httpVer + " 415 Unsupported Media Type\n"+
+                        "</body></html>"
+
+        elif rootPath is "/":
+
+            if os.path.isfile(rootPath + "index.html"):
+                f = open(rootPath + "/index.html",'r')
             
-        
-        
+                content = httpVer + " 200 OK\n" +
+                    "Content-Type: " + mine["html"] +
+                    f.read()
+
+        else:
+            content = httpVer + " 400 "
         self.request.sendall(content)
         
 if __name__ == "__main__":
