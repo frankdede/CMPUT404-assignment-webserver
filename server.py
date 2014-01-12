@@ -18,7 +18,7 @@ import os.path
 #
 #
 # Furthermore it is derived from the Python documentation examples thus
-# some of the code is Copyright © 2001-2013 Python Software
+# some of the code is Copyright 2001-2013 Python Software
 # Foundation; All Rights Reserved
 #
 # http://docs.python.org/2/library/socketserver.html
@@ -50,40 +50,39 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         if os.path.isfile(rootPath + filePath):
         # test if the file exists
             fileExt = filePath.split(".")[1]
-
-            if (fileExt is "css") || (fileExt is "html") :
+            if (fileExt == 'css') or (fileExt == 'html') :
                 # open a file in either .css or .html type
                 f = open(rootPath + filePath,'r')
 
-                content = httpVer + status["200"] +
-                        "Content-Type:" + mime[fileExt]
-                        + f.read()
+                content = ( httpVer + status["200"] + "Content-Type:" + mime[fileExt]
+                        + f.read())
             else:
 
-                content = httpVer + status["415"] +
+                content = ( httpVer + status["415"] +
                         "Content-Type:" + mime["html"] +
                         "<!DOCTYPE html>\n"+
-                        "<html><body>" + httpVer + " 415 Unsupported Media Type\n"+
-                        "</body></html>"
+                        "<html><body>" + httpVer + ' 415 Unsupported Media Type\n'+
+                        "</body></html>" )
 
-        elif filePath is "/":
+        elif filePath == "/":
         # when path is /
-            if os.path.isfile(rootPath + "index.html"):
+            if os.path.isfile(rootPath + "/index.html"):
+               
                 f = open(rootPath + "/index.html",'r')
-            
-                content = httpVer + status["200"] +
+                content = ( httpVer + status["200"] +
                     "Content-Type:" + mime["html"] +
-                    f.read()
+                    f.read())
 
         else:
-            content = httpVer + status["400"] +
+            content = ( httpVer + status["400"] +
             "Content-Type:" + mime["html"]+
             "<!DOCTYPE html>\n" +
             "<html><body>" + httpVer + status["400"] +
-            "</body></html>"
-
+            "</body></html>")
+             
         self.request.sendall(content)
-        
+
+               
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
 
