@@ -1,5 +1,6 @@
 import SocketServer
 import os.path
+import posixpath
 # coding: utf-8
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
@@ -34,7 +35,7 @@ status = {"200":" 200 OK\n",
         "415":" 415 Unsupported Media Type\n",
         "400":" 404 Not Found\n"}
 
-rootPath = "./www"
+rootPath = "./www/"
 
 class MyWebServer(SocketServer.BaseRequestHandler):
     
@@ -47,9 +48,14 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         filePath = data.split()[1]
         # Get directory of the target file
 
-        if os.path.isfile(rootPath + filePath):
+        # Get the abspath of the rootPath
+        absPath = os.path.abspath(rootPath)
+        
+        # normalize filepath
+        newPath = posixpath.normpath(absPath+filePath)
+        if (newPath.find(absPath) == 0) and (os.path.isfile(newPath)) :
         # test if the file exists
-            fileExt = filePath.split(".")[1]
+            fileExt = filePath.split(".")[-1]
             if (fileExt == 'css') or (fileExt == 'html') :
                 # open a file in either .css or .html type
                 f = open(rootPath + filePath,'r')
@@ -64,11 +70,11 @@ class MyWebServer(SocketServer.BaseRequestHandler):
                         "<html><body>" + httpVer + ' 415 Unsupported Media Type\n'+
                         "</body></html>" )
 
-        elif filePath == "/":
-        # when path is /
-            if os.path.isfile(rootPath + "/index.html"):
+        # when path is / or /bla/
+        elif (newPath.find(absPath) == 0) and (os.path.isfile(newPath +
+            "/index.html")):
                
-                f = open(rootPath + "/index.html",'r')
+                f = open(newPath + "/index.html",'r')
                 content = ( httpVer + status["200"] +
                     "Content-Type:" + mime["html"] +
                     f.read())
@@ -79,7 +85,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             "<!DOCTYPE html>\n" +
             "<html><body>" + httpVer + status["400"] +
             "</body></html>")
-             
+         
         self.request.sendall(content)
 
                
